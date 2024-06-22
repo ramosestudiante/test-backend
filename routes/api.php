@@ -22,19 +22,23 @@ Route::post('/register', [AuthController::class, 'register']);
 
 
 Route::middleware('auth.api')->get('/user', function (Request $request) {
-    return $request->user();
+  return $request->user();
 });
 
-// Rutas protegidas (requieren autenticación)
-Route::middleware(['auth:api','admin'])->prefix('user')->group(function () {
-    Route::get('/list', [UserController::class, 'list']);
-    Route::post('/create', [UserController::class, 'create']);
-    Route::delete('/{id}', [UserController::class, 'delete']);
-    Route::put('/{id}',[UserController::class,'update']);
-    
+// Rutas protegidas (requieren autenticación y que sean admin para poder crear eliminar y actualizar
+Route::middleware(['auth:api', 'admin'])->prefix('user')->group(function () {
+  Route::post('/create', [UserController::class, 'create']);
+  Route::delete('/{id}', [UserController::class, 'delete']);
+  Route::put('/{id}', [UserController::class, 'update']);
 });
 
-Route::get('/login', function () {
-    return response()->json(['error' => 'Unauthorized'], 401);
-})->name('login');
+// solo requieren autenticacion de usuario para poder mostrar la lista de usuarios y ver el usuario por id
+Route::middleware(['auth:api'])->prefix('user')->group(function () {
+  Route::get('/list', [UserController::class, 'list']);
+  Route::get('/{id}', [UserController::class, 'show']);
+});
 
+
+// Route::get('/login', function () {
+//     return response()->json(['error' => 'Unauthorized'], 401);
+// })->name('login');
