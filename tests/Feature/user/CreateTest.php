@@ -7,34 +7,42 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 // CREATE
 it('allows create user', function () {
+  $fake_email = 'newuser@example.com';
+  $fake_password = 'Password123!';
   DB::beginTransaction();
 
-  // Crear un usuario para iniciar sesión
+  // Create a user to log in
   $userLogin = User::factory()->create([
-    'name' => 'alberto',
-    'email' => 'alberto@example.com',
-    'password' => bcrypt('Password123!'),
-    'role_id' => 1
+    'name' =>'jose',
+    'email' => $fake_email,
+    'password' => bcrypt($fake_password),
+    'rut' => '11111111-1',
+    'birthday'=> '1995/01/02',
+    'address'=> 'valparaiso',
+    'role_id' => 1,
   ]);
 
-  // Generar JWT token para ese usuario 
+  // Generate JWT token for that user
   $token = JWTAuth::fromUser($userLogin);
 
-  // token de autorización en los headers
+  // authorization token in headers
   $headers = [
     'Authorization' => 'Bearer ' . $token,
     'Accept' => 'application/json',
   ];
 
-  // Datos del nuevo usuario
+  // New user data
   $newUser = [
-    'name' => 'joe',
-    'email' => 'de@gmail.com',
-    'password' => 'Password456!',
-    'role_id' => 1
+    'name' =>'jose',
+    'email' => 'ab@gmail.com',
+    'password' => bcrypt($fake_password),
+    'rut' => '11111111-1',
+    'birthday'=> '1995/01/02',
+    'address'=> 'valparaiso',
+    'role_id' => 1,
   ];
 
-  // Solicitud POST para crear un nuevo usuario
+  // POST request to create a new user
   $response = $this->withHeaders($headers)->postJson('/api/user/create', $newUser);
   $response->assertStatus(201);
   $response->assertHeader('Content-Type', 'application/json');
@@ -52,37 +60,44 @@ it('allows create user', function () {
 });
 
 
-// No tiene permiso para crear un usuario
-
+// You do not have permission to create a user
 it('without permissions to create user', function () {
+  $fake_email = 'newuser@example.com';
+  $fake_password = 'Password123!';
   DB::beginTransaction();
 
-  // Crear un usuario para iniciar sesión con el rol 2 de un usuario normal no admin
+  // Create a user to log in with role 2 of a normal non-admin user
   $userLogin = User::factory()->create([
-    'name' => 'alberto',
-    'email' => 'alberto@example.com',
-    'password' => bcrypt('Password123!'),
-    'role_id' => 2
+    'name' =>'jose',
+    'email' => $fake_email,
+    'password' => bcrypt($fake_password),
+    'rut' => '11111111-1',
+    'birthday'=> '1995/01/02',
+    'address'=> 'valparaiso',
+    'role_id' => 2,
   ]);
 
-  // Generar JWT token para ese usuario 
+  // Generate JWT token for that user
   $token = JWTAuth::fromUser($userLogin);
 
-  // token de autorización en los headers
+  // authorization token in headers
   $headers = [
     'Authorization' => 'Bearer ' . $token,
     'Accept' => 'application/json',
   ];
 
-  // Datos del nuevo usuario
+  // New user data
   $newUser = [
-    'name' => 'joe',
-    'email' => 'de@gmail.com',
-    'password' => 'Password456!',
-    'role_id' => 2
+    'name' =>'jose',
+    'email' => 'ab@gmail.com',
+    'password' => bcrypt($fake_password),
+    'rut' => '11111111-1',
+    'birthday'=> '1995/01/02',
+    'address'=> 'valparaiso',
+    'role_id' => 1,
   ];
 
-  // Solicitud POST para crear un nuevo usuario
+  // POST request to create a new user
   $response = $this->withHeaders($headers)->postJson('/api/user/create', $newUser);
 
   $response->assertStatus(403);
@@ -95,37 +110,45 @@ it('without permissions to create user', function () {
 });
 
 
-// falla registro de usuario con un input no valido
+// user registration fails with invalid input
 it('fails create user with invalid input', function () {
+  $fake_email = 'newuser@example.com';
+  $fake_password = 'Password123!';
   DB::beginTransaction();
 
-  // Crear un usuario para iniciar sesión
+  // Create a user to log in
   $userLogin = User::factory()->create([
-    'name' => 'alberto',
-    'email' => 'alberto@example.com',
-    'password' => bcrypt('Password123!'),
-    'role_id' => 1
+   'name' =>'jose',
+    'email' => $fake_email,
+    'password' => bcrypt($fake_password),
+    'rut' => '11111111-1',
+    'birthday'=> '1995/01/02',
+    'address'=> 'valparaiso',
+    'role_id' => 1,
   ]);
 
-  // Generar JWT token para ese usuario 
+  // Generate JWT token for that user
   $token = JWTAuth::fromUser($userLogin);
 
-  // token de autorización en los headers
+  // authorization token in headers
   $headers = [
     'Authorization' => 'Bearer ' . $token,
     'Accept' => 'application/json',
   ];
 
 
-  // Datos del nuevo usuario
+  // New user data
   $newUser = [
-    'name' => 'joe',
-    'email' => 'invalid-email',
+   'name' =>'jose',
+    'email' => 'invalid email',
     'password' => '1234',
-    'role_id' => 2
+    'rut' => '11111111-1',
+    'birthday'=> '1995/01/02',
+    'address'=> 'valparaiso',
+    'role_id' => 1,
   ];
 
-  // Solicitud POST para crear un nuevo usuario
+  // POST request to create a new user
   $response = $this->withHeaders($headers)->postJson('/api/user/create', $newUser);
 
 
@@ -133,17 +156,17 @@ it('fails create user with invalid input', function () {
   $response->assertHeader('Content-Type', 'application/json');
 
 
-  // compruebo si la estructura del json de email contiene el campo 'error' y si tiene el formato esperado para mostrar el error de validacion
+  // check if the email json structure contains the 'error' field and if it has the expected format to show the validation error
   $response->assertJsonStructure([
     'error' => ['email']
   ]);
 
-  // compruebo si la estructura del json de password contiene el campo 'error' y si tiene el formato esperado para mostrar el error de validacion
+  // check if the password json structure contains the 'error' field and if it is in the expected format to display the validation error
   $response->assertJsonStructure([
     'error' => ['password']
   ]);
 
-  // compruebo si name tiene errores de validacion 
+  // check if name has validation errors
   $response->assertJsonMissingValidationErrors(['name']);
 
   DB::rollBack();

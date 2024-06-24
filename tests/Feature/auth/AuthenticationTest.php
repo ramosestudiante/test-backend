@@ -3,17 +3,19 @@
 use Illuminate\Support\Facades\DB;
 use App\Models\User;
 
-// Prueba de inicio de sesion de un usuario
-// creo al usuario y ocupo transaccion para esperar que se cree el usuario y haga la prueba de login y una vez listo hace el rollback
-
+// Test user login
+// I create the user and occupy transaction to wait for the user to be created and perform the login test and once ready, perform the rollback
 it('allows user to login', function () {
   $fake_email = 'fake@example.com';
-  $fake_password = 'password';
+  $fake_password = 'Password123!';
 
   DB::beginTransaction();
   $user = User::factory()->create([
     'email' => $fake_email,
     'password' => bcrypt($fake_password),
+    'rut' => '11111111-1',
+    'birthday'=> '1995/01/02',
+    'address'=> 'valparaiso',
     'role_id' => 1,
   ]);
 
@@ -28,7 +30,7 @@ it('allows user to login', function () {
   DB::rollBack();
 });
 
-// falla inicio de sesion con un input no valido sea email o password
+// login fails with an invalid input, be it email or password
 it('fails login with invalid input', function () {
   $response = $this->postJson('/api/login', [
     'email' => 'invalid_email',
@@ -38,7 +40,7 @@ it('fails login with invalid input', function () {
   $response->assertStatus(422);
   $response->assertHeader('Content-Type', 'application/json');
 
-  // Verifica que haya errores de validación para el campo email o password 
+  // Verify that there are validation errors for the email or password field
   $response->assertJsonValidationErrors(['email', 'password']);
 });
 

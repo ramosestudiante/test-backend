@@ -6,28 +6,33 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 
 // DELETE
-
+// Delete a user
 it('allows delete user', function () {
+  $fake_email = 'newuser@example.com';
+  $fake_password = 'Password123!';
   DB::beginTransaction();
 
-  // Crear un usuario para iniciar sesión
+  // Create a user to log in
   $userLogin = User::factory()->create([
-    'Id' => 20,
-    'name' => 'alberto',
-    'email' => 'alberto@example.com',
-    'password' => bcrypt('Password123!'),
-    'role_id' => 1
+    'id' =>20,
+    'name' =>'jose',
+    'email' => $fake_email,
+    'password' => bcrypt($fake_password),
+    'rut' => '11111111-1',
+    'birthday'=> '1995/01/02',
+    'address'=> 'valparaiso',
+    'role_id' => 1,
   ]);
 
-  // Generar JWT token para ese usuario 
+  // Generate JWT token for that user
   $token = JWTAuth::fromUser($userLogin);
 
-  // Token de autorización en los headers
+  // Authorization token in headers
   $headers = [
     'Authorization' => 'Bearer ' . $token,
     'Accept' => 'application/json',
   ];
-  // Solicitud POST para crear un nuevo usuario
+  // POST request to create a new user
   $response = $this->withHeaders($headers)->deleteJson('/api/user/20',);
 
 
@@ -39,22 +44,27 @@ it('allows delete user', function () {
 });
 
 
-// Error en eliminar un usuario que no existe
+// Error deleting a user that does not exist
 it('fails id to delete user', function () {
+  $fake_email = 'newuser@example.com';
+  $fake_password = 'Password123!';
   DB::beginTransaction();
 
-  // Crear un usuario para iniciar sesión
+  // Create a user to log in
   $userLogin = User::factory()->create([
-    'name' => 'alberto',
-    'email' => 'alberto@example.com',
-    'password' => bcrypt('Password123!'),
-    'role_id' => 1
+    'name' =>'jose',
+    'email' => $fake_email,
+    'password' => bcrypt($fake_password),
+    'rut' => '11111111-1',
+    'birthday'=> '1995/01/02',
+    'address'=> 'valparaiso',
+    'role_id' => 1,
   ]);
 
-  // Generar JWT token para ese usuario 
+  // Generate JWT token for that user
   $token = JWTAuth::fromUser($userLogin);
 
-  // Token de autorización en los headers
+  // Authorization token in headers
   $headers = [
     'Authorization' => 'Bearer ' . $token,
     'Accept' => 'application/json',
@@ -62,7 +72,7 @@ it('fails id to delete user', function () {
 
   $nonExistentId = 9999;
 
-  // Solicitud DELETE para eliminar un usuario que no existe
+  // Delete request to delete a user that does not exist
   $response = $this->withHeaders($headers)->deleteJson("/api/user/{$nonExistentId}");
 
 

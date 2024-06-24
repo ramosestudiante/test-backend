@@ -18,21 +18,20 @@ use App\Http\Controllers\UserController;
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
-// Route::get('/list', [UserController::class, 'list']);
 
 
 Route::middleware('auth.api')->get('/user', function (Request $request) {
   return $request->user();
 });
 
-// Rutas protegidas (requieren autenticación y que sean admin para poder crear eliminar y actualizar
+// Protected routes (require authentication and admin to be able to create, delete and update
 Route::middleware(['auth:api', 'admin'])->prefix('user')->group(function () {
   Route::post('/create', [UserController::class, 'create']);
   Route::delete('/{id}', [UserController::class, 'delete']);
   Route::put('/{id}', [UserController::class, 'update']);
 });
 
-// solo requieren autenticacion de usuario para poder mostrar la lista de usuarios y ver el usuario por id
+// only require user authentication to be able to display the list of users and see the user by id...
 Route::middleware(['auth:api'])->prefix('user')->group(function () {
   Route::get('/list', [UserController::class, 'list']);
   Route::get('/{id}', [UserController::class, 'show']);

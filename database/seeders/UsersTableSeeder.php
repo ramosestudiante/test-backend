@@ -6,6 +6,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Carbon\Carbon;
 
 class UsersTableSeeder extends Seeder
 {
@@ -18,13 +19,19 @@ class UsersTableSeeder extends Seeder
             [
                 'name' => 'Admin',
                 'email' => 'admin@example.com',
-                'password' => Hash::make('123123'),
+                'rut' => '11111111-k',
+                'birthday' =>  Carbon::createFromFormat('d/m/Y', '21/09/1995')->format('Y-m-d'),
+                'address' => 'valparaiso',
+                'password' => Hash::make('Password123!'),
                 'role_id'  => 1,
             ],
             [
                 'name' => 'User',
                 'email' => 'user@example.com',
-                'password' => Hash::make('123'),
+                'rut' => '11111111-k',
+                'birthday' =>  Carbon::createFromFormat('d/m/Y', '21/09/1995')->format('Y-m-d'),
+                'address' => 'valparaiso',
+                'password' => Hash::make('Password123!'),
                 'role_id' => 2, 
             ],
         ]);

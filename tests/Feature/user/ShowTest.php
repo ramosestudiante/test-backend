@@ -5,27 +5,32 @@ use App\Models\User;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 it('fails show user', function () {
+    $fake_email = 'newuser@example.com';
+    $fake_password = 'Password123!';
     DB::beginTransaction();
     
-    // Crear un usuario para iniciar sesión
+    // Create a user to log in
     $userLogin = User::factory()->create([
-        'name' => 'alberto',
-        'email' => 'alberto@example.com',
-        'password' => bcrypt('Password123!'),
-        'role_id' => 1
+        'name' =>'jose',
+        'email' => $fake_email,
+        'password' => bcrypt($fake_password),
+        'rut' => '11111111-1',
+        'birthday'=> '1995/01/02',
+        'address'=> 'valparaiso',
+        'role_id' => 1,
     ]);
 
-    // Generar JWT token para ese usuario 
+    // Generate JWT token for that user
     $token = JWTAuth::fromUser($userLogin);
    
-    // Configurar el token de autorización en los headers
+    // Set authorization token in headers
     $headers = [
         'Authorization' => 'Bearer ' . $token,
         'Accept' => 'application/json',
     ];
-    // Enviar solicitud DELETE para eliminar un usuario que no existe
+    // Send DELETE request to delete a user that does not exist
     $nonExistentId = 9999;
-    // Enviar solicitud POST para crear un nuevo usuario
+   // Send POST request to create a new user
    $response = $this->withHeaders($headers)->getJson("/api/user/{$nonExistentId}");
 
     

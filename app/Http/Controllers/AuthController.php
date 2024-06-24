@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\ValidationRules;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -13,11 +14,12 @@ use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Facades\Cookie;
 
+
 class AuthController extends Controller
 {
   public function __construct()
   {
-    //  tanto login como register tendran una excepcion del middleware de auth no requeriran autenticacion
+   // both login and register will have an exception from the auth middleware, they will not require authentication
 
     $this->middleware('auth:api', ['except' => ['login', 'register']]);
   }
@@ -25,34 +27,35 @@ class AuthController extends Controller
   public function login(Request $request)
   {
     try {
-      // Valido los campos de email y password
+      // Validate email and password fields
       $request->validate([
         'email' => 'required|email',
         'password' => 'required|min:8',
       ]);
 
-      // Obtengo solo los datos emall y password de la request
+      // Obtain only the email and password data from the request
       $credentials = $request->only('email', 'password');
-
-      // verifico si el campo remember en el request existe
+      
+      // check if the remember field in the request exists
       $remember = $request->filled('remember');
-
-      // Verifico si no existe el token oh si las credenciales y el remember no coinciden las credenciales son invalidas
+      
+      // I check if the token does not exist oh if the credentials and Remember do not match the credentials are invalid
       if (!$token = JWTAuth::attempt($credentials, $remember)) {
         return response()->json(['error' => 'Credenciales inválidas'], 401);
       }
-
+      
       $user = Auth::user();
-
-      // Genero una cookie de autorización
-      // factory crea el token de jwtAuth
-      // getttl time to live  tiempo de vida del token
+      
+      // Generate an authorization cookie
+      // factory creates the jwtAuth token
+      // getTTL time to live token lifetime
       $cookie = Cookie::make('jwt_token', $token, JWTAuth::factory()->getTTL() * 60, '/', null, false, true); // Secure=true; HttpOnly=true
-
+      
       return response()->json([
         'status' => 'success',
         'user' => $user,
       ], 200)->withCookie($cookie);
+      
     } catch (ValidationException $e) {
       return response()->json(['errors' => $e->validator->errors()], 422);
     } catch (JWTException $e) {
@@ -66,52 +69,42 @@ class AuthController extends Controller
   {
     try {
 
-      // Valido los campos de name,email y password con sus reglas de validacion
+      // Validate the name, email and password fields with their validation rules
+      $request->validate(
+        ValidationRules::userRules(),
+        ValidationRules::userMessages()
+    );
+       // Validate the RUT
+       if (!validarRut($request->input('rut'))) {
+        return response()->json(['error' => 'El RUT ingresado no es válido.'], 422);
+    }
 
-      $request->validate([
-        'name' => 'required|string|max:255',
-        'email' => 'required|email|unique:users,email',
-        'password' => [
-          'required',
-          'string',
-          Password::min(8) // Mínimo 8 caracteres de longitud
-            ->mixedCase() // Debe contener letras mayúsculas y minúsculas
-            ->numbers() // Debe contener al menos un número
-            ->symbols(), // Debe contener al menos un símbolo
-        ],
-      ],  [
-        'name.required' => 'El nombre es obligatorio.',
-        'email.required' => 'El correo electrónico es obligatorio.',
-        'email.email' => 'El correo electrónico debe ser una dirección de correo válida.',
-        'email.unique' => 'El correo electrónico ya está registrado.',
-        'password.required' => 'La contraseña es obligatoria.',
-        'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
-        'password.password' => 'La contraseña debe incluir al menos una letra mayúscula, una letra minúscula, un número y un carácter especial.',
-      ]);
-
-      // Crear un nuevo usuario y dejo por defecto el rol 2 que es un usario normal no admins
+      // Create a new user and leave role 2 by default, which is a normal non-admin user
       $user = new User();
       $user->name = $request->input('name');
       $user->email = $request->input('email');
+      $user->rut = $request->input('rut');
+      $user->birthday = $request->input('birthday');
+      $user->address = $request->input('address');
       $user->password = Hash::make($request->input('password'));
       $user->role_id = $request->input('role_id', 2);
       $user->save();
 
-      // Autenticar al usuario después del registro
+      // Authenticate the user after registration
       Auth::login($user);
 
-      // Generación del token JWT opcional para devolverlo en la respuesta
+      // Generate the optional JWT token to return in the response
       $token = JWTAuth::fromUser($user);
 
-      // Devolver una respuesta de éxito
       return response()->json([
         'status' => 'success',
         'message' => 'Usuario registrado exitosamente',
         'user' => $user,
       ], 201);
+      
     } catch (ValidationException $e) {
       return response()->json(['error' => $e->validator->errors()], 422);
-    } catch (\Throwable $e) {
+    }catch (\Throwable $e) {
       if (strpos($e->getMessage(), 'SQLSTATE[23000]') !== false) {
         return response()->json(['error' => 'El correo electrónico ya está registrado.'], 422);
       }

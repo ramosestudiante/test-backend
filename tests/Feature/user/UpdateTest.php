@@ -7,45 +7,50 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 // UPDATE
 
+// fails to update a user with invalid inputs
 it('fails to update user with invalid input', function() {
+    $fake_email = 'newuser@example.com';
+    $fake_password = 'Password123!';
     DB::beginTransaction();
     
-    // Crear un usuario para iniciar sesión
+    // Create a user to log in
     $userLogin = User::factory()->create([
-        'id' => 40,
-        'name' => 'alberto',
-        'email' => 'alberto@example.com',
-        'password' => bcrypt('Password123!'),
-        'role_id' => 1
+      'name' =>'jose',
+        'email' => $fake_email,
+        'password' => bcrypt($fake_password),
+        'rut' => '11111111-1',
+        'birthday'=> '1995/01/02',
+        'address'=> 'valparaiso',
+        'role_id' => 1,
     ]);
 
-    // Generar JWT token para ese usuario 
+    // Generate JWT token for that user
     $token = JWTAuth::fromUser($userLogin);
    
-    // Configurar el token de autorización en los headers
+    // Configure the authorization token in the headers
     $headers = [
         'Authorization' => 'Bearer ' . $token,
         'Accept' => 'application/json',
     ];
     
-    // Datos del nuevo usuario a crear con datos inválidos
+    // Data of the new user to be created with invalid data
     $newUser = [
-        'name' => 'joe', // Nombre válido
-        'email' => 'invalid email', // Email inválido
-        'password' => 'short', // Contraseña demasiado corta
-        'role_id' => 1
+        'name' =>'jose',
+        'email' => 'invalid email',
+        'password' => '1234',
+        'rut' => '11111111-1',
+        'birthday'=> '1995/01/02',
+        'address'=> 'valparaiso',
+        'role_id' => 1,
     ];
     
-    // Enviar solicitud PUT para modificar al usuario
+    // Send PUT request to modify the user
     $response = $this->withHeaders($headers)->putJson("/api/user/{$userLogin->id}", $newUser);
 
-    // Verificar que la solicitud devuelva un código de estado 422 (Unprocessable Entity)
     $response->assertStatus(422);
-
-    // Verificar que la respuesta tiene el header 'Content-Type' como 'application/json'
     $response->assertHeader('Content-Type', 'application/json');
 
-    // Verificar la estructura del JSON para errores de validación
+    // Check the JSON structure for validation errors
     $response->assertJsonStructure([
         'errors' => [
             'email',
@@ -58,44 +63,51 @@ it('fails to update user with invalid input', function() {
     DB::rollBack();
 });
 
+// Update user
 it('allows update user', function () {
+    $fake_email = 'newuser@example.com';
+    $fake_password = 'Password123!';
     DB::beginTransaction();
     
-    // Crear un usuario para iniciar sesión
+    // Create a user to log in
     $userLogin = User::factory()->create([
-        'id' => 40,
-        'name' => 'alberto',
-        'email' => 'alberto@example.com',
-        'password' => bcrypt('Password123!'),
-        'role_id' => 1
+        'name' =>'jose',
+        'email' => $fake_email,
+        'password' => bcrypt($fake_password),
+        'rut' => '11111111-1',
+        'birthday'=> '1995/01/02',
+        'address'=> 'valparaiso',
+        'role_id' => 1,
     ]);
 
-    // Generar JWT token para ese usuario 
+    // Generate JWT token for that user
     $token = JWTAuth::fromUser($userLogin);
    
-    // Configurar el token de autorización en los headers
+    // Configure the authorization token in the headers
     $headers = [
         'Authorization' => 'Bearer ' . $token,
         'Accept' => 'application/json',
     ];
     
-    // Datos del nuevo usuario a crear
+    // Data of the new user to create
     $newUser = [
-        'name' => 'joe',
+       'name' =>'jose',
         'email' => 'albert@gmail.com',
-        'password' => 'Password456!',
-        'role_id' => 1
+        'password' => bcrypt($fake_password),
+        'rut' => '11111111-1',
+        'birthday'=> '1995/01/02',
+        'address'=> 'valparaiso',
+        'role_id' => 1,
     ];
     
-    // Enviar solicitud PUT para modificar al usuario
+    // Send PUT request to modify the user
     $response = $this->withHeaders($headers)->putJson("/api/user/{$userLogin->id}", $newUser);
 
     $response->assertStatus(200);
 
-    // Verificar que la respuesta tenga el header 'Content-Type' como 'application/json'
     $response->assertHeader('Content-Type', 'application/json');
     
-    // Verificar que la estructura JSON devuelta sea la esperada
+    // Verify that the JSON structure returned is as expected
     $response->assertJsonStructure([
         'status',
         'message',
