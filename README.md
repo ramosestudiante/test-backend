@@ -85,3 +85,19 @@ To run the tests you must execute:
 $ make test
 ```
 #### The testing tool used was PestPHP for its simplicity in describing the tests.
+
+
+## API REST
+I opted to manually implement the REST API instead of using Laravel's apiResource method or the --api flag when generating controllers, this allows me to define grouping based on the auth.api and admin middleware to manage permissions
+
+For Example --api flag
+```
+$ php artisan make:controller PostController --api
+
+the code above generates this
+
+$ Route::apiResource('posts', PostController::class);
+
+```
+
+
