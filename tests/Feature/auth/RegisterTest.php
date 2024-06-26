@@ -66,7 +66,7 @@ it('fails registration with duplicate email', function () {
   $fake_password = 'Password123!';
   DB::beginTransaction();
   // create a user
-  $existingUser = User::factory()->create([
+  User::factory()->create([
     'name' =>'jose',
     'email' => $fake_email,
     'password' => bcrypt($fake_password),

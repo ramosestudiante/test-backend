@@ -43,7 +43,7 @@ it('allows create user', function () {
   ];
 
   // POST request to create a new user
-  $response = $this->withHeaders($headers)->postJson('/api/user/create', $newUser);
+  $response = $this->withHeaders($headers)->postJson('/api/users', $newUser);
   $response->assertStatus(201);
   $response->assertHeader('Content-Type', 'application/json');
   $response->assertJsonStructure([
@@ -98,7 +98,7 @@ it('without permissions to create user', function () {
   ];
 
   // POST request to create a new user
-  $response = $this->withHeaders($headers)->postJson('/api/user/create', $newUser);
+  $response = $this->withHeaders($headers)->postJson('/api/users', $newUser);
 
   $response->assertStatus(403);
 
@@ -149,7 +149,7 @@ it('fails create user with invalid input', function () {
   ];
 
   // POST request to create a new user
-  $response = $this->withHeaders($headers)->postJson('/api/user/create', $newUser);
+  $response = $this->withHeaders($headers)->postJson('/api/users', $newUser);
 
 
   $response->assertStatus(422);

@@ -1,0 +1,353 @@
+openapi: 3.0.2
+
+info:
+  title: Test Solution Api
+  description: |
+    Solución para el desafío de evaluación para desarrollador PHP/Laravel - Vue.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8000
+    description: Servidor local
+  - url: http://localhost:8080
+    description: Servidor con Docker
+
+paths:
+  /api/login:
+    post:
+      tags: [Auth]
+      summary: Login with token JWT
+      requestBody:
+        description: 'Login user'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/login'
+        required: true
+      responses:
+        200:
+          description: 'Response user login'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ResponseUser' }
+        422:
+          description: 'Error de validación'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /api/register:
+    post:
+      tags: [Auth]
+      summary: Register users
+      requestBody:
+        description: 'Register user'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/register'
+        required: true
+      responses:
+        200:
+          description: 'Response user register'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ResponseUser' }
+        422:
+          description: 'Error de validación'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+  
+  /api/users:
+    get:
+      tags: [User]
+      summary: All users
+      security:
+        - jwt: []
+      parameters:
+        - $ref: '#/components/parameters/PaginationPage'
+        - $ref: '#/components/parameters/PaginationPerPage'
+      responses:
+        200:
+          description: 'get all users'
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedResource'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items: { $ref: '#/components/schemas/ResponseUser' }
+
+        404:
+          description: 'Recurso no encontrado'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+    post:
+      tags: [User]
+      summary: Create user
+      security:
+        - jwt: []
+      requestBody:
+        description: 'create a new user'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/register'
+        required: true
+      responses:
+        200:
+          description: 'Response new user register'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ResponseUser' }
+        422:
+          description: 'Error de validación'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+  /api/users/{id}:
+    delete:
+      tags: [User]
+      summary: Delete user
+      security:
+        - jwt: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: user Id Delete
+      responses:
+        200:
+          description: 'user delete'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ResponseUser' }
+        404:
+          description: 'Recurso no encontrado'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+    patch:
+      tags: [User]
+      summary: Update data user
+      security:
+        - jwt: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: user Id Delete
+      requestBody:
+        description: 'update data user'
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateDataUser'
+        required: true
+      responses:
+        200:
+          description: 'update user success'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ResponseUser' }
+        404:
+          description: 'Recurso no encontrado'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+    get:
+      tags: [User]
+      summary: Get user
+      security:
+        - jwt: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+          description: get user data
+      responses:
+        200:
+          description: 'user data'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ResponseUser' }
+        404:
+          description: 'resource not found'
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+
+components:
+  parameters:
+    PaginationPage:
+      in: query
+      name: page
+      schema: { type: integer, default: 1, description: 'Página actual' }
+    PaginationPerPage:
+      in: query
+      name: per_page
+      schema: { type: integer, default: 25, description: 'Cantidad de elementos por página' }
+
+  schemas:
+    PaginatedResource:
+      type: object
+      properties:
+        total: { type: number }
+        page: { type: number }
+        per_page: { type: number }
+    # Requests bodies schemas
+    login:
+      type: object
+      properties:
+        email:
+          type: string
+          description: El email del usuario
+          example: 'admin@example.com'
+        password:
+          type: string
+          description: La contraseña del usuario
+          example: 'Password123!'
+        remember:
+          type: boolean
+          description: remember login
+          example: true
+    register:
+      type: object
+      properties:
+        name:
+          type: string
+          description: name user
+          example: 'Alberto'
+        email:
+          type: string
+          description: El email del usuario
+          example: 'd@gmail.com'
+        password:
+          type: string
+          description: La contraseña del usuario
+          example: 'Password123!'
+        rut:
+          type: string
+          description: rut user validate
+          example: '22222222-2'
+        birthday:
+          type: date
+          description: birthday date
+          example: '1995/02/01'
+        address:
+          type: string
+          description: adrress user
+          example: 'valparaiso'
+    # Response bodies
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Descripción general del error
+        errors:
+          type: object
+          description: Objeto con el detalle de cada error
+    ResponseUser:
+      type: object
+      properties:
+        user:
+          type: object
+          properties:
+            id:
+              type: integer
+              example: 1
+            role_id:
+              type: integer
+              example: 2
+            name:
+              type: string
+              example: 'Diego'
+            email:
+              type: string
+              example: 'admin@example.com'
+            rut:
+              type: string
+              example: '11111111-1'
+            birthday:
+              type: date,
+              example: '1995/02/01'
+            address:
+              type: string
+              example: 'valparaiso'
+            email_verified_at:
+              type: string
+              example: null
+            created_at:
+              type: string
+              example: '2023-02-23T00:09:16.000000Z'
+            updated_at:
+              type: string
+              example: '2023-02-23T12:33:45.000000Z'
+    AllUser:
+      type: object
+      properties:
+        users:
+          type: array
+          items:  
+            { $ref: '#/components/schemas/User' }
+      example:
+        users:
+          - id: 1
+            role_id: 1
+            name: "Admin"
+            email: "admin@example.com"
+            rut: "11111111-k"
+            birthday: "1995-09-21T00:00:00.000000Z"
+            address: "valparaiso"
+            email_verified_at: null
+            created_at: null
+            updated_at: null
+    UpdateDataUser:
+      type: object
+      properties:
+        name:
+          type: string
+          description: name user
+          example: 'Alberto'
+        email:
+          type: string
+          description: El email del usuario
+          example: 'd@gmail.com'
+        birthday:
+          type: date
+          description: birthday date
+          example: '1995/02/01'
+        address:
+          type: string
+          description: adrress user
+          example: 'valparaiso'
+        
+          
+  securitySchemes:
+    jwt:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Laravel JWT
+
+security:
+  - jwt: []
+
+tags:
+  - name: Auth
+  - name: User
+

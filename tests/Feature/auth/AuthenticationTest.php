@@ -10,7 +10,7 @@ it('allows user to login', function () {
   $fake_password = 'Password123!';
 
   DB::beginTransaction();
-  $user = User::factory()->create([
+  User::factory()->create([
     'email' => $fake_email,
     'password' => bcrypt($fake_password),
     'rut' => '11111111-1',

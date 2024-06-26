@@ -37,15 +37,12 @@ it('fails to update user with invalid input', function() {
     $newUser = [
         'name' =>'jose',
         'email' => 'invalid email',
-        'password' => '1234',
-        'rut' => '11111111-1',
         'birthday'=> '1995/01/02',
         'address'=> 'valparaiso',
-        'role_id' => 1,
     ];
     
     // Send PUT request to modify the user
-    $response = $this->withHeaders($headers)->putJson("/api/user/{$userLogin->id}", $newUser);
+    $response = $this->withHeaders($headers)->patchJson("/api/users/{$userLogin->id}", $newUser);
 
     $response->assertStatus(422);
     $response->assertHeader('Content-Type', 'application/json');
@@ -53,9 +50,7 @@ it('fails to update user with invalid input', function() {
     // Check the JSON structure for validation errors
     $response->assertJsonStructure([
         'errors' => [
-            'email',
-            'password',
-        ]
+            'email']
     ]);
 
     $response->assertJsonMissingValidationErrors(['name']);
@@ -91,17 +86,14 @@ it('allows update user', function () {
     
     // Data of the new user to create
     $newUser = [
-       'name' =>'jose',
-        'email' => 'albert@gmail.com',
-        'password' => bcrypt($fake_password),
-        'rut' => '11111111-1',
+        'name' =>'jose',
+        'email' => 'albes@gmail.com',
         'birthday'=> '1995/01/02',
         'address'=> 'valparaiso',
-        'role_id' => 1,
     ];
     
     // Send PUT request to modify the user
-    $response = $this->withHeaders($headers)->putJson("/api/user/{$userLogin->id}", $newUser);
+    $response = $this->withHeaders($headers)->patchJson("/api/users/{$userLogin->id}", $newUser);
 
     $response->assertStatus(200);
 

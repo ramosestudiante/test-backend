@@ -12,12 +12,19 @@ class Role extends Model
      *
      * @var array<int, string>
      */
+    
     protected $fillable = [
         'name',
     ];
 
 
+
+
     use HasFactory;
+
+    const ADMIN = 1;
+    const USER = 2;
+
     public function users()
     {
         return $this->hasMany(User::class);

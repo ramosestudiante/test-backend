@@ -6,6 +6,8 @@ run-local:
 	docker compose -f ./docker/docker-compose.local.yml --project-directory ./ -p backend_api down && \
 	docker compose -f ./docker/docker-compose.local.yml --project-directory ./ -p backend_api build --no-cache && \
 	docker compose -f ./docker/docker-compose.local.yml --project-directory ./ -p backend_api up -d db app
+generate-key:
+	@docker exec backend_api php artisan key:generate
 
 stop-local:
 	@docker compose -f ./docker/docker-compose.local.yml --project-directory ./ -p backend_api down
@@ -31,13 +33,8 @@ seeders:
 Re-seed:
 	@docker exec backend_api php artisan migrate:fresh --seed
 
-rm-database:
-	@docker exec backend_api php artisan migrate:rollback
+test:
+	@docker exec backend_api php artisan test
 
-rm-migrations:
-	@docker exec backend_api npm run sequelize db:migrate:undo:all
-
-rm-seeders:
-	@docker exec backend_api npm run sequelize db:seed:undo:all
 
 

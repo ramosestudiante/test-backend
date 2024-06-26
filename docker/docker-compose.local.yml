@@ -4,7 +4,7 @@ services:
     container_name: backend_db
     build:
       context: ./
-      dockerfile: ./docker/local/backend.dockerfile
+      dockerfile: ./docker/local/db.dockerfile
     networks:
       backend_db_network:
         aliases:
@@ -45,12 +45,6 @@ services:
       - DB_DATABASE
       - DB_USERNAME
       - DB_PASSWORD
-      - VITE_APP_NAME
-      - VITE_PUSHER_APP_KEY
-      - VITE_PUSHER_HOST
-      - VITE_PUSHER_PORT
-      - VITE_PUSHER_SCHEME
-      - VITE_PUSHER_APP_CLUSTER
       - JWT_SECRET
       - DOCKER_DB_PORT
       - PORT

@@ -13,7 +13,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::get('/', function () {
+    return response()->json([
+        'service' => config('app.name'),
+        'environment' => config('app.env'),
+        'version' => '1.0.0',
+    ]);
+  });
+  
 
-// Route::get('/', function () {
-//     return view('welcome');
-// });

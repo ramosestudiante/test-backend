@@ -9,16 +9,16 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Auth;
 use App\Helpers\ValidationRules;
+use App\Http\Middleware\CheckAdmin;
+use App\Models\Role;
 
 class UserController extends Controller
 {
   public function list(Request $request)
   {
-
     try {
-     // Get all users
-      $users = User::all();
-
+    $perPage = $request->get('per_page', 10);
+    $users = User::paginate($perPage);
       return response()->json([
         'status' => 'success',
         'users' => $users,
@@ -43,7 +43,6 @@ class UserController extends Controller
        if (!validarRut($request->input('rut'))) {
         return response()->json(['error' => 'El RUT ingresado no es válido.'], 422);
     }
-
       // Create a new user
       $user = new User();
       $user->name = $request->input('name');
@@ -52,7 +51,7 @@ class UserController extends Controller
       $user->birthday = $request->input('birthday');
       $user->address = $request->input('address');
       $user->password = Hash::make($request->input('password'));
-      $user->role_id = $request->input('role_id', 2);
+      $user->role_id = $request->input('role_id', Role::USER);
       $user->save();
 
       return response()->json([
@@ -103,23 +102,11 @@ class UserController extends Controller
       $validatedData = $request->validate([
         'name' => 'string',
         'email' => 'string|email|unique:users',
-        'password' => [
-          'string',
-          Password::min(8) // Minimum 8 characters long
-            ->mixedCase() // Must contain upper and lower case letters
-            ->numbers() // Must contain at least one number
-            ->symbols(), // Must contain at least one symbol
-        ],
+        'address' => 'string',
+        'birthday' => 'date'
       ],  [
         'email.unique' => 'El correo electrónico ya está registrado.',
-        'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
-        'password.password' => 'La contraseña debe incluir al menos una letra mayúscula, una letra minúscula, un número y un carácter especial.',
       ]);
-
-      // Update the user's password if the field exists
-      if (isset($validatedData['password'])) {
-        $validatedData['password'] = bcrypt($validatedData['password']);
-      }
       // update the user according to whether they pass the validation rules
       $user->update($validatedData);
 

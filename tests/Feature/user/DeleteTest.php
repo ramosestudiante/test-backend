@@ -33,7 +33,7 @@ it('allows delete user', function () {
     'Accept' => 'application/json',
   ];
   // POST request to create a new user
-  $response = $this->withHeaders($headers)->deleteJson('/api/user/20',);
+  $response = $this->withHeaders($headers)->deleteJson('/api/users/20',);
 
 
   $response->assertStatus(200);
@@ -73,7 +73,7 @@ it('fails id to delete user', function () {
   $nonExistentId = 9999;
 
   // Delete request to delete a user that does not exist
-  $response = $this->withHeaders($headers)->deleteJson("/api/user/{$nonExistentId}");
+  $response = $this->withHeaders($headers)->deleteJson("/api/users/{$nonExistentId}");
 
 
   $response->assertStatus(404);
