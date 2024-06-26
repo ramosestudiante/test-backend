@@ -33,12 +33,17 @@ WORKDIR /var/www/html
 COPY . .
 
 # Install Laravel dependencies
-RUN composer install --no-dev --optimize-autoloader
+RUN composer install 
 
-# permissions
+# Generate Laravel application key and clear configuration cache
+RUN php artisan key:generate && php artisan config:clear
+
+# Set permissions for Laravel storage and testing folders
 RUN chown -R www-data:www-data /var/www/html/storage \
-    && chmod -R 755 /var/www/html/storage
-
+    && chmod -R 755 /var/www/html/storage \
+    && chown -R www-data:www-data /var/www/html/tests/Feature \
+    && chmod -R 755 /var/www/html/tests/Feature
+    
 # Expose port 80
 EXPOSE 80
 
