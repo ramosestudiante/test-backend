@@ -60,6 +60,29 @@ It should be remembered that if you are on Windows the makefile file will work b
 
 #### The best option is to go to the makefile file and copy the codes of each definition
 
+### Create network
+```
+$ docker network create backend_test
+```
+### Create containers
+```
+$ docker compose -f ./docker/docker-compose.local.yml --project-directory ./ -p backend_api down
+```
+```
+$ docker compose -f ./docker/docker-compose.local.yml --project-directory ./ -p backend_api build --no-cache
+```
+```
+$ docker compose -f ./docker/docker-compose.local.yml --project-directory ./ -p backend_api up -d db app
+```
+### Migrations
+```
+$ php artisan migrate
+```
+### seeders
+```
+$ php artisan db:seed
+```
+
 ## Linux / Ubuntu
 Run the command to build docker images:
 
