@@ -14,7 +14,7 @@ it('allows delete user', function () {
 
   // Create a user to log in
   $userLogin = User::factory()->create([
-    'id' =>20,
+    'id' =>100,
     'name' =>'jose',
     'email' => $fake_email,
     'password' => bcrypt($fake_password),

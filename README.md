@@ -16,12 +16,15 @@ Diego Ramos Rios diegoe.ramosrios@gmail.com
 - Mysql
 
 ## Installation
+### credentials to enter the application
+- User: admin@example.com
+- password: Password123!
 
 ### Environment variables
 
 Copy `.env.example` to `.env` and set all values.
 
-- `APP_ENV`: Environment. Values `local`.
+- `APP_ENV`: Environment. Values `local` or `development`.
 - `PORT`: The application port exposed.
 
 ### Database environment:

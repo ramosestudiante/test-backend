@@ -23,7 +23,7 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 # Nginx server
 COPY docker/local/nginx.conf /etc/nginx/sites-available/default
 
-# Copy Supervisor configuration file proccess
+# Copy Supervisor configuration file process
 COPY docker/local/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 # directory docker
@@ -39,11 +39,10 @@ RUN composer install
 RUN php artisan key:generate && php artisan config:clear
 
 # Set permissions for Laravel storage and testing folders
-RUN chown -R www-data:www-data /var/www/html/storage \
-    && chmod -R 755 /var/www/html/storage \
-    && chown -R www-data:www-data /var/www/html/tests/Feature \
-    && chmod -R 755 /var/www/html/tests/Feature
-    
+RUN mkdir -p storage/framework/cache/data && \
+    chown -R www-data:www-data storage bootstrap/cache && \
+    chmod -R 755 storage bootstrap/cache
+
 # Expose port 80
 EXPOSE 80
 

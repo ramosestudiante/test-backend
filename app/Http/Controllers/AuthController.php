@@ -17,53 +17,66 @@ class AuthController extends Controller
 {
   public function __construct()
   {
-    // both login and register will have an exception from the auth middleware, they will not require authentication
-
     $this->middleware('auth:api', ['except' => ['login', 'register']]);
   }
 
   public function login(Request $request)
   {
     try {
-      // Validate email and password fields
+      // Validate email and password
       $request->validate([
         'email' => 'required|email',
-        'password' => 'required|min:8',
+        'password' => [
+          'required',
+          'string',
+          \Illuminate\Validation\Rules\Password::min(8) // Mínimo 8 caracteres
+        ],
+      ], [
+        'email.required' => 'El correo electrónico es obligatorio.',
+        'email.email' => 'El correo electrónico debe ser una dirección de correo válida.',
+        'password.required' => 'La contraseña es obligatoria.',
+        'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
       ]);
 
-      // Obtain only the email and password data from the request
+      // Get email and password request
       $credentials = $request->only('email', 'password');
 
-      // check if the remember field in the request exists
+      // verify remember request
       $remember = $request->filled('remember');
 
-      
-
-      // I check if the token does not exist oh if the credentials and Remember do not match the credentials are invalid
+      // token JWT
       if (!$token = JWTAuth::attempt($credentials, $remember)) {
         return response()->json(['error' => 'Credenciales inválidas'], 401);
       }
 
+      // user authenticated
       $user = JWTAuth::user();
 
-      // Generate an authorization cookie
-      // factory creates the jwtAuth token
-      // getTTL time to live token lifetime
-      $cookie = Cookie::make('jwt_token', $token, JWTAuth::factory()->getTTL() * 60, '/', null, false, true); // Secure=true; HttpOnly=true
+      // expiration token
+      $refreshTokenTTL = now()->addWeeks(2); // time life refresh token
+      // create refresh token
+      $refreshToken = JWTAuth::claims(['exp' => $refreshTokenTTL])->fromUser($user);
 
-      $response = response()->json([
+      // get time life access_token
+      $accessTokenTTL = JWTAuth::factory()->getTTL() * 60;
+      $expiresAt = now()->addSeconds($accessTokenTTL);
+
+      $response = [
         'status' => 'success',
         'user' => $user,
-        'token' => $token
-    ], 200);
-    
-    $response->withCookie($cookie);
-    
-    return $response;
+        'access_token' => $token,
+        'refresh_token' => $refreshToken,
+        'expires_at' => $expiresAt->toDateTimeString(),
+        'refresh_expires_at' => $refreshTokenTTL->toDateTimeString(),
+      ];
+      // Establecer cookies para access_token y refresh_token
+      $accessTokenTTL = JWTAuth::factory()->getTTL() * 60;
+
+      return response()->json($response);
     } catch (ValidationException $e) {
       return response()->json(['errors' => $e->validator->errors()], 422);
     } catch (JWTException $e) {
-      return response()->json(['error' => 'No se pudo crear el token'], 500);
+      return response()->json(['error' => 'No se pudo crear el token', 'details' => $e->getMessage()], 500);
     } catch (\Exception $e) {
       return response()->json(['error' => 'Error en el servidor. Por favor, inténtelo de nuevo más tarde.'], 500);
     }
@@ -98,14 +111,17 @@ class AuthController extends Controller
 
       // Generate a JWT token for the user
       $token = JWTAuth::fromUser($user);
-      
-      return response()->json([
+
+      $response =  response()->json([
         'status' => 'success',
         'message' => 'Usuario registrado exitosamente',
         'user' => $user,
-        'token' => $token,
+        'access_token' => $token,
       ], 201);
-    
+      // add token in header response
+      $response->header('Authorization', 'Bearer ' . $token);
+
+      return $response;
     } catch (ValidationException $e) {
       return response()->json(['error' => $e->validator->errors()], 422);
     } catch (\Throwable $e) {
@@ -113,6 +129,40 @@ class AuthController extends Controller
         return response()->json(['error' => 'El correo electrónico ya está registrado.'], 422);
       }
       return response()->json(['error' => 'No se pudo registrar el usuario'], 500);
+    }
+  }
+
+  public function refresh(Request $request)
+  {
+    try {
+      // Get the current token from the request
+      if (!$token = JWTAuth::getToken()) {
+        return response()->json(['error' => 'No se encontró un token válido para refrescar'], 401);
+      }
+
+      // Attempt to refresh the token
+      $newToken = JWTAuth::refresh($token);
+
+      return response()->json([
+        'status' => 'success',
+        'access_token' => $newToken,
+        'refresh_token' => $newToken,
+      ])->header('Authorization', 'Bearer ' . $newToken);
+    } catch (JWTException $e) {
+      return response()->json(['error' => 'No se pudo refrescar el token', 'details' => $e->getMessage()], 500);
+    }
+  }
+
+  public function validationToken(Request $request)
+  {
+    try {
+      // GET Validate token JWT
+      $user = JWTAuth::parseToken()->authenticate();
+
+      return response()->json(['user' => $user], 200);
+
+    } catch (\Exception $e) {
+      return response()->json(['error' => 'Unauthorized'], 401);
     }
   }
 }

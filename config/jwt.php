@@ -102,6 +102,8 @@ return [
     */
 
     'ttl' => env('JWT_TTL', 60),
+    'refresh_ttl' => env('JWT_REFRESH_TTL', 20160), // Tiempo de vida del refresh token en minutos (por defecto 2 semanas)
+
 
     /*
     |--------------------------------------------------------------------------

@@ -23,8 +23,10 @@ use App\Http\Controllers\UserController;
 
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/register', [AuthController::class, 'register']);
+Route::post('/refresh', [AuthController::class, 'refresh']);
 
 
+Route::middleware('auth:api')->get('/validatetoken', [AuthController::class, 'validationToken']);
 
 // Protected routes (require authentication and admin to be able to create, delete and update
 Route::middleware(['auth:api', 'admin'])->prefix('users')->group(function () {

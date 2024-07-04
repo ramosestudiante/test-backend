@@ -6,23 +6,28 @@ run-local:
 	docker compose -f ./docker/docker-compose.local.yml --project-directory ./ -p backend_api down && \
 	docker compose -f ./docker/docker-compose.local.yml --project-directory ./ -p backend_api build --no-cache && \
 	docker compose -f ./docker/docker-compose.local.yml --project-directory ./ -p backend_api up -d db app
+
+# Define targets
+run-dev:
+	@docker network create backend_test_dev || true
+	docker compose -f ./docker/docker-compose.development.yml --project-directory ./ -p backend_api_dev down && \
+	docker compose -f ./docker/docker-compose.development.yml --project-directory ./ -p backend_api_dev build --no-cache && \
+	docker compose -f ./docker/docker-compose.development.yml --project-directory ./ -p backend_api_dev up -d db app
+
 generate-key:
 	@docker exec backend_api php artisan key:generate
-
 stop-local:
 	@docker compose -f ./docker/docker-compose.local.yml --project-directory ./ -p backend_api down
 
 rm-local:
 	@docker compose -f ./docker/docker-compose.local.yml --project-directory ./ -p backend_api down -v --remove-orphans
 
+
 create-network:
 	@docker network create backend_api
 
 rm-network:
 	@docker network rm backend_api
-
-database:
-	@docker exec backend_api npm run sequelize db:create
 
 migrations:
 	@docker exec backend_api php artisan migrate
@@ -37,4 +42,30 @@ test:
 	@docker exec backend_api php artisan test
 
 
+# generate-key-dev:
+# 	@docker exec backend_api_dev php artisan key:generate
 
+# stop-dev:
+# 	@docker compose -f ./docker/docker-compose.development.yml --project-directory ./ -p backend_api_dev down
+
+# rm-dev:
+# 	@docker compose -f ./docker/docker-compose.development.yml --project-directory ./ -p backend_api_dev down -v --remove-orphans
+
+# create-network_dev:
+# 	@docker network create backend_api_dev
+
+# rm-network_dev:
+# 	@docker network rm backend_api_dev
+
+
+# migrations_dev:
+# 	@docker exec backend_api_dev php artisan migrate
+
+# seeders_dev:
+# 	@docker exec backend_api_dev php artisan db:seed
+
+# Re-seed_dev:
+# 	@docker exec backend_api_dev php artisan migrate:fresh --seed
+
+# test_dev:
+# 	@docker exec backend_api_dev php artisan test
