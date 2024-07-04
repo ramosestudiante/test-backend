@@ -111,12 +111,14 @@ class AuthController extends Controller
 
       // Generate a JWT token for the user
       $token = JWTAuth::fromUser($user);
+      $refreshToken = JWTAuth::claims(['type' => 'refresh'])->fromUser($user);
 
       $response =  response()->json([
         'status' => 'success',
         'message' => 'Usuario registrado exitosamente',
         'user' => $user,
         'access_token' => $token,
+        'refreshToken' => $refreshToken
       ], 201);
       // add token in header response
       $response->header('Authorization', 'Bearer ' . $token);

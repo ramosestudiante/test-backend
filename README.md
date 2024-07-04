@@ -3,7 +3,7 @@
 
 
 # Test Solution
-Solución para el desafío de evaluación para desarrollador PHP/Laravel Vue.
+Solution to the developer evaluation challenge. PHP/Laravel Vue.
 
 ## Autor
 Diego Ramos Rios diegoe.ramosrios@gmail.com
