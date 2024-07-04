@@ -9,7 +9,7 @@ class ValidationRules
         return [
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'rut' => 'required|string|max:12',
+            'rut' => 'required|string|max:12|unique:users', 
             'birthday' => 'required|date',
             'address' => 'required|string|max:255',
             'password' => [
@@ -30,6 +30,7 @@ class ValidationRules
             'email.required' => 'El correo electrónico es obligatorio.',
             'email.email' => 'El correo electrónico debe ser una dirección de correo válida.',
             'email.unique' => 'El correo electrónico ya está registrado.',
+            'rut.unique' => 'El Rut ya está registrado.',
             'rut.required' => 'El RUT es obligatorio.',
             'birthday.required' => 'La fecha de nacimiento es obligatoria.',
             'birthday.date' => 'La fecha de nacimiento debe ser una fecha válida.',
