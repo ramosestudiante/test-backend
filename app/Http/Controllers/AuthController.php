@@ -118,7 +118,7 @@ class AuthController extends Controller
         'message' => 'Usuario registrado exitosamente',
         'user' => $user,
         'access_token' => $token,
-        'refreshToken' => $refreshToken
+        'refresh_token' => $refreshToken
       ], 201);
       // add token in header response
       $response->header('Authorization', 'Bearer ' . $token);
