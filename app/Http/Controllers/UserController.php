@@ -17,27 +17,23 @@ class UserController extends Controller
     try {
       $authenticatedUserId = auth()->user()->id;
       // Obtener los parámetros de la solicitud
-      $perPage = $request->query('per_page', 10); // 10 user per page
-      $page = $request->query('page', 1); // the first page
-
-      // params search
-      $name = $request->query('name');
-      $rut = $request->query('rut');
-      $address = $request->query('address');
-
+      
+      // the first page
+      $search = $request->query('search'); 
+      $page = $request->query('page', 1);
+      $perPage = $request->query('per_page'); // 10 user per page
       // querys
       $query = User::query();
       $query->where('id', '!=', $authenticatedUserId);
-      if ($name) {
-        $query->where('name', 'like', '%' . $name . '%');
-      }
-      if ($rut) {
-        $query->where('rut', 'like', '%' . $rut . '%');
-      }
-      if ($address) {
-        $query->where('address', 'like', '%' . $address . '%');
-      }
 
+      if ($search) {
+        $query->where(function($query) use ($search) {
+          $query->where('name', 'like', '%' . $search . '%')
+          ->orWhere('rut', 'like', '%' . $search . '%')
+          ->orWhere('address', 'like', '%' . $search . '%');
+        });
+      }
+      
       // paginate
       $users = $query->paginate($perPage, ['*'], 'page', $page);
 
@@ -124,9 +120,12 @@ class UserController extends Controller
       // validate the name, email and password fields with their validation rules
       
       // Validate the RUT
-      if (!validarRut($request->input('rut'))) {
-        return response()->json(['error' => 'El RUT ingresado no es válido.'], 422);
-      }
+       // Validar el RUT solo si se envía en la solicitud y ha cambiado
+       if ($request->has('rut') && $request->input('rut') !== $user->rut) {
+        if (!validarRut($request->input('rut'))) {
+            return response()->json(['error' => 'El RUT ingresado no es válido.'], 422);
+        }
+    }
 
       $validatedData = $request->validate([
         'name' => 'string',
